@@ -1,6 +1,4 @@
 #include <stdio.h>
-
-#include <stdio.h>
 #include "driver/ledc.h"
 #include "esp_err.h"
 #include "freertos/FreeRTOS.h"
@@ -16,11 +14,20 @@ typedef struct {
 #define LED_GREEN_PIN       32
 #define LED_BLUE_PIN        25
 
-ledc_timer_config_t ledc_timer[3];
+ledc_timer_config_t ledc_timer = {
+    .speed_mode = LEDC_LOW_SPEED_MODE,
+    .timer_num  = LEDC_TIMER_0,
+    .duty_resolution = LEDC_TIMER_13_BIT,
+    .freq_hz = 1000,
+    .clk_cfg = LEDC_AUTO_CLK
+};
+
 ledc_channel_config_t ledc_channel[3];
 
 static void init(void)
 {
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+
     ledc_channel[0].channel = LEDC_CHANNEL_0;
     ledc_channel[0].gpio_num = LED_RED_PIN;
 
@@ -31,15 +38,7 @@ static void init(void)
     ledc_channel[2].gpio_num = LED_BLUE_PIN;
 
     for (int i = 0; i < 3; i++)
-    {
-        ledc_timer[i].speed_mode = LEDC_LOW_SPEED_MODE;
-        ledc_timer[i].timer_num = LEDC_TIMER_0;
-        ledc_timer[i].duty_resolution = LEDC_TIMER_13_BIT;
-        ledc_timer[i].freq_hz = 1000;
-        ledc_timer[i].clk_cfg = LEDC_AUTO_CLK;
-
-        ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer[i]));
-
+    {   
         ledc_channel[i].speed_mode = LEDC_LOW_SPEED_MODE;
         ledc_channel[i].timer_sel = LEDC_TIMER_0;
         ledc_channel[i].intr_type = LEDC_INTR_DISABLE;
